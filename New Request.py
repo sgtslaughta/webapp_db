@@ -1,5 +1,9 @@
 import streamlit as st
 from lib.validators import *
+import logging
+
+logging.basicConfig(level=logging.WARNING)
+
 
 st.title("New Request")
 

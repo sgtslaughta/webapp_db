@@ -94,11 +94,12 @@ def sanitize_name(name):
 
 
 @contextmanager
-def connect(host, user, password):
+def connect(host, port, user, password):
     connection = None
     try:
         connection = mysql.connector.connect(
             host=host,
+            port=port,
             user=user,
             password=password
         )
@@ -110,8 +111,12 @@ def connect(host, user, password):
     except mysql.connector.errors.InterfaceError as ie:
         print("Invalid host")
         sql_logger.error(f"Invalid host: {ie}")
+    except RuntimeError as re:
+        print("Error connecting to database")
+        sql_logger.error(f"Error connecting to database: {re}")
     finally:
         if connection is not None:
+            sql_logger.debug("Closing connection")
             connection.close()
 
 
@@ -134,22 +139,24 @@ def list_tables(conn, database_name):
         tables = cursor.fetchall()
         sql_logger.debug(f"List of tables in database {database_name}: {tables}")
         return tables
-    except mysql.connector.errors.DatabaseError:
-        print("Invalid database")
-        sql_logger.error("Invalid database")
+    except mysql.connector.errors.DatabaseError as e:
+        print("Invalid database: ", e)
+        sql_logger.error(e)
         return None
 
 
-def get_table_columns(conn, table_name):
+def get_table_columns(conn, table_name, database_name=None):
     try:
         cursor = conn.cursor()
+        if database_name is not None:
+            cursor.execute(f"USE {database_name}")
         cursor.execute(f"SHOW COLUMNS FROM {table_name}")
         columns = cursor.fetchall()
         sql_logger.debug(f"Columns of table {table_name}: {columns}")
         return columns
-    except mysql.connector.errors.DatabaseError:
-        print("Invalid database")
-        sql_logger.error("Invalid database")
+    except mysql.connector.errors.DatabaseError as e:
+        print("Err", e)
+        sql_logger.error(e)
         return None
 
 
@@ -181,21 +188,33 @@ def make_column(column_name, data_type, primary_key=False, auto_increment=True,
     return column
 
 
-def add_table(conn, db, table_name, columns):
+def add_table(conn, db, table_name, columns, keys=None, create_query=None):
     table_name = sanitize_name(table_name)
     try:
         cursor = conn.cursor()
-        cursor.execute(f"USE {db}")
-        # Generate the column definition for the CREATE TABLE statement
-        columns_sql = ", ".join(
-            [f"{name} {data_type}" for name, data_type in columns])
-        cursor.execute(f"CREATE TABLE {table_name} ({columns_sql})")
-        sql_logger.debug(
-            f"Table '{table_name}' created successfully in database '{db}'")
-    except mysql.connector.errors.DatabaseError as e:
-        print(f"Table {table_name} already exists: {e}")
-        sql_logger.error(
-            f"Error creating table '{table_name}' in database '{db}': {e}")
+        # If a custom CREATE TABLE query is provided, use it
+        if create_query:
+            cursor.execute(create_query)
+        else:
+            # Otherwise, use the standard approach
+            cursor.execute(f"USE {db}")
+            # Generate the column definitions for the CREATE TABLE statement
+            columns_sql = ", ".join([f"{name} {data_type}" for name, data_type in columns])
+            # Generate the keys and constraints for the CREATE TABLE statement
+            keys_sql = ""
+            if keys:
+                keys_sql = ", " + ", ".join(keys)
+            # Combine columns, keys, and constraints in the CREATE TABLE query
+            create_table_query = f"CREATE TABLE {table_name} ({columns_sql}{keys_sql})"
+            cursor.execute(create_table_query)
+
+        sql_logger.debug(f"Table '{table_name}' created successfully in database '{db}'")
+    except mysql.connector.errors.ProgrammingError as pe:
+        if "already exists" in str(pe):
+            print(f"Table {table_name} already exists")
+        else:
+            print(f"Error creating table '{table_name}': {pe}")
+        sql_logger.error(f"Error creating table '{table_name}' in database '{db}': {pe}")
 
 
 def drop_database(conn, database_name):
@@ -220,31 +239,55 @@ def drop_table(conn, table_name):
             f"Error dropping table '{table_name}': Table does not exist")
 
 
-def insert(conn, table_name, columns, values):
+def add_entry_to_table(conn, db, table, values):
     try:
         cursor = conn.cursor()
-        columns = ", ".join(columns)
-        values = ", ".join([f"'{value}'" for value in values])
-        cursor.execute(
-            f"INSERT INTO {table_name} ({columns}) VALUES ({values})")
-        sql_logger.debug(f"Data inserted into table '{table_name}' successfully")
-    except mysql.connector.errors.DatabaseError as e:
-        print(f"Table {table_name} already exists: ", e)
-        sql_logger.error(
-            f"Error inserting data into table '{table_name}': {e}")
+        # Construct the INSERT query dynamically based on the provided values
+        columns = ', '.join(values.keys())
+        placeholders = ', '.join(['%s'] * len(values))
+        query = f"INSERT INTO {table} ({columns}) VALUES ({placeholders})"
+        # Execute the INSERT query
+        cursor.execute(f"USE {db}")
+        cursor.execute(query, tuple(values.values()))
+        # Commit the changes
+        conn.commit()
 
+        sql_logger.debug(f"New entry added to '{table}' table in database '{db}'")
+        return True
+
+    except mysql.connector.Error as e:
+        print(f"Error adding entry to table '{table}': {e}")
+        return False
+
+
+def remove_entry_from_table(conn, db, table, where_clause):
+    try:
+        cursor = conn.cursor()
+        # Construct the DELETE query dynamically based on the provided values
+        query = f"DELETE FROM {table} WHERE {where_clause}"
+        # Execute the DELETE query
+        cursor.execute(f"USE {db}")
+        cursor.execute(query)
+        # Commit the changes
+        conn.commit()
+        sql_logger.debug(f"Entry removed from '{table}' table in database '{db}'")
+        return True
+    except mysql.connector.Error as e:
+        print(f"Error removing entry from table '{table}': {e}")
+        return False
 
 def execute_query(connection, query):
-    cursor = None
+    result = None
     try:
         cursor = connection.cursor()
         cursor.execute(query)
         result = cursor.fetchall()
         sql_logger.debug(f"Query executed successfully: {query}")
+
         return result
-    except mysql.connector.Error as err:
-        print(f"Error: {err}")
-        sql_logger.error(f"Error executing query: {err}")
+    except mysql.connector.Error as e:
+        print(f"Error executing the query: {e}")
+    return result
 
 
 def update(conn, table_name, columns, where_clause):
@@ -268,3 +311,45 @@ def delete(conn, table_name, where_clause):
         print(f"Table {table_name} already exists")
         sql_logger.error(
             f"Error deleting data in table '{table_name}': Table does not exist")
+
+
+def test_if_db_exists(conn, db_name):
+    try:
+        cursor = conn.cursor()
+        cursor.execute(f"USE {db_name}")
+        sql_logger.debug(f"Database '{db_name}' exists")
+        return True
+    except mysql.connector.errors.DatabaseError:
+        print(f"Database {db_name} does not exist")
+        sql_logger.error(f"Database '{db_name}' does not exist")
+        return False
+
+def test_if_table_exists(conn, db_name, table):
+    try:
+        cursor = conn.cursor()
+        cursor.execute(f"USE {db_name}")
+        cursor.execute(f"SHOW TABLES LIKE '{table}'")
+        result = cursor.fetchall()
+        if len(result) == 0:
+            sql_logger.debug(f"Table '{table}' does not exist")
+            return False
+        else:
+            sql_logger.debug(f"Table '{table}' exists")
+            return True
+    except mysql.connector.errors.DatabaseError:
+        print(f"Database {db_name} does not exist")
+        sql_logger.error(f"Database '{db_name}' does not exist")
+        return False
+
+
+def get_table_data(conn, db, table):
+    try:
+        cursor = conn.cursor(dictionary=True)  # Use dictionary cursor to get results as dictionaries
+        cursor.execute(f"USE {db}")
+        cursor.execute(f"SELECT * FROM {table}")
+        result = cursor.fetchall()
+        return result
+
+    except mysql.connector.Error as e:
+        print(f"Error retrieving data from table '{table}': {e}")
+        return None

@@ -5,14 +5,14 @@ import unittest
 # Test the DB connection
 class TestDBConnection(unittest.TestCase):
     def test_connection(self):
-        with connect("127.0.0.1", "root", "your_root_password") as conn:
+        with connect("127.0.0.1", 3306, "root", "your_root_password") as conn:
             self.assertIsNotNone(conn, "!! CONNECTION FAILED !!")
             dbs = list_databases(conn)
 
 
 class TestDB(unittest.TestCase):
     def test_table_create(self):
-        with connect("127.0.0.1", "root", "your_root_password") as conn:
+        with connect("127.0.0.1", 3306, "root", "your_root_password") as conn:
             create_database(conn, "test_db")
             columns_list = [("id", "INT"), ("name", "VARCHAR(255)"),
                             ("age", "INT")]
@@ -26,7 +26,7 @@ class TestDB(unittest.TestCase):
 
 class TestDBInsert(unittest.TestCase):
     def test_insert_into_table(self):
-        with connect("127.0.0.1", "root", "your_root_password") as conn:
+        with connect("127.0.0.1", 3306, "root", "your_root_password") as conn:
             create_database(conn, "test_db")
             columns_list = [("id", "INT"), ("name", "VARCHAR(255)"),
                             ("age", "INT")]
