@@ -43,7 +43,6 @@ def print_selected_rows(rows):
 def submit():
     st.sidebar.success("Rows submitted for approval")
     st.balloons()
-    # deselect rows
     set_data()
 
 
@@ -65,13 +64,13 @@ approve_txt = "Select as many items as you wish to approve, then click the " \
               "button below to approve and submit your selections for " \
               "processing. This action cannot be undone and will be " \
               "executed immediately."
-approve = st.button("Approve & Submit", on_click=print_selected_rows,
+approve = st.button("✔️ Approve & Submit", on_click=print_selected_rows,
                     args=[selection], type="primary", help=approve_txt)
 if approve:
     with st.container(border=True):
-        st.write("The following rows will be submitted for approval:")
+        st.write("The following rows will be approved and submitted:")
         st.write(st.session_state.submissions)
-        st.session_state.submissions = []
+        #st.session_state.submissions = []
         col1, col2 = st.columns(2)
         ok = col1.button("OK", type="primary", use_container_width=True,
                          on_click=submit)
