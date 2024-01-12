@@ -1,6 +1,8 @@
+import pandas as pd
 import streamlit as st
 from lib.validators import *
 import logging
+from io import StringIO
 
 logging.basicConfig(level=logging.WARNING)
 
@@ -44,6 +46,11 @@ def add_email(email, *args):
 def submit():
     print(st.session_state.full_request)
 
+def csv_handler(csv):
+    stringio = StringIO(csv.getvalue().decode("utf-8"))
+    df = pd.read_csv(csv)
+    st.write(df)
+
 with st.container(border=True):
     ssh_key = st.text_input(label="SSH KEY", key="ssh_key", placeholder="SSH "
                                                                       "Key")
@@ -53,9 +60,13 @@ with st.container(border=True):
                                     placeholder="Email Address")
     add_email_button = st.button(label="Add Email", on_click=add_email,
                                  args=[email_address])
+    with st.container(border=True):
+        st.write("OPTIONAL: Upload CSV of SSH Keys and Email Addresses")
+        upload_csv = st.file_uploader(label="Upload CSV", type="csv")
+        if upload_csv:
+            st.info("CSV uploaded")
+            csv_handler(upload_csv)
     st.text_area(label="Complete Request", value=st.session_state.full_request,
                  height=200)
     st.button(label="Submit Request for Approval",
               on_click=submit)
-
-print(st.session_state.full_request)
