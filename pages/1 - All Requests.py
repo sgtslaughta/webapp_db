@@ -60,10 +60,8 @@ selection = dataframe_with_selections(st.session_state.fetched_data)
 
 st.write("INFO: To view the request XML, scroll to the right inside the data"
          " table. Then double click the cell containing the XML text.")
-approve_txt = "Select as many items as you wish to approve, then click the " \
-              "button below to approve and submit your selections for " \
-              "processing. This action cannot be undone and will be " \
-              "executed immediately."
+approve_txt = "Select as many items as you wish to approve, then click this " \
+              "button."
 approve = st.button("✔️ Approve & Submit", on_click=print_selected_rows,
                     args=[selection], type="primary", help=approve_txt)
 if approve:
