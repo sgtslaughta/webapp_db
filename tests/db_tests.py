@@ -32,7 +32,7 @@ class TestDBInsert(unittest.TestCase):
                             ("age", "INT")]
             add_table(conn, "test_db", "test_table",
                       columns_list)
-            insert(conn, "test_table", ["id", "name", "age"],
+            add_entry_to_table(conn, "test_table", ["id", "name", "age"],
                               [1, "John", 20])
             q = execute_query(conn, "SELECT * FROM test_table")
             self.assertIs(q[0][0], 1, "!! INSERT INTO TABLE FAILED !!")

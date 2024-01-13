@@ -5,6 +5,13 @@ import re
 from contextlib import contextmanager
 import os
 
+# Hard coded credentials for testing, this should be changed to use environment variables
+# or a config file
+HOST = "127.0.0.1"
+PORT = 3306
+USER = "root"
+PASSWORD = "ASuperStrongAndSecurePassword123!!!"
+
 # Get the current directory
 current_dir = os.path.dirname(os.path.abspath(__file__))
 logs_folder_path = current_dir.replace('lib', 'logs')
@@ -19,7 +26,8 @@ sql_logger = logging.getLogger('sql_logger')
 sql_logger.setLevel(logging.DEBUG)
 # Configure a RotatingFileHandler for SQL-related logs
 sql_log_filename = os.path.join(logs_folder_path, 'SQL.log')
-sql_handler = RotatingFileHandler(sql_log_filename, maxBytes=1000000, backupCount=5)
+sql_handler = RotatingFileHandler(sql_log_filename, maxBytes=1000000,
+                                  backupCount=5)
 sql_handler.setLevel(logging.DEBUG)
 # Define a formatter for the SQL logs
 sql_formatter = logging.Formatter('%(asctime)s:%(levelname)s:%(message)s')
@@ -137,7 +145,8 @@ def list_tables(conn, database_name):
         cursor = conn.cursor()
         cursor.execute(f"SHOW TABLES FROM {database_name}")
         tables = cursor.fetchall()
-        sql_logger.debug(f"List of tables in database {database_name}: {tables}")
+        sql_logger.debug(
+            f"List of tables in database {database_name}: {tables}")
         return tables
     except mysql.connector.errors.DatabaseError as e:
         print("Invalid database: ", e)
@@ -199,7 +208,8 @@ def add_table(conn, db, table_name, columns, keys=None, create_query=None):
             # Otherwise, use the standard approach
             cursor.execute(f"USE {db}")
             # Generate the column definitions for the CREATE TABLE statement
-            columns_sql = ", ".join([f"{name} {data_type}" for name, data_type in columns])
+            columns_sql = ", ".join(
+                [f"{name} {data_type}" for name, data_type in columns])
             # Generate the keys and constraints for the CREATE TABLE statement
             keys_sql = ""
             if keys:
@@ -208,13 +218,15 @@ def add_table(conn, db, table_name, columns, keys=None, create_query=None):
             create_table_query = f"CREATE TABLE {table_name} ({columns_sql}{keys_sql})"
             cursor.execute(create_table_query)
 
-        sql_logger.debug(f"Table '{table_name}' created successfully in database '{db}'")
+        sql_logger.debug(
+            f"Table '{table_name}' created successfully in database '{db}'")
     except mysql.connector.errors.ProgrammingError as pe:
         if "already exists" in str(pe):
             print(f"Table {table_name} already exists")
         else:
             print(f"Error creating table '{table_name}': {pe}")
-        sql_logger.error(f"Error creating table '{table_name}' in database '{db}': {pe}")
+        sql_logger.error(
+            f"Error creating table '{table_name}' in database '{db}': {pe}")
 
 
 def drop_database(conn, database_name):
@@ -240,24 +252,27 @@ def drop_table(conn, table_name):
 
 
 def add_entry_to_table(conn, db, table, values):
+    cursor = None
     try:
         cursor = conn.cursor()
         # Construct the INSERT query dynamically based on the provided values
         columns = ', '.join(values.keys())
         placeholders = ', '.join(['%s'] * len(values))
         query = f"INSERT INTO {table} ({columns}) VALUES ({placeholders})"
+
         # Execute the INSERT query
-        cursor.execute(f"USE {db}")
         cursor.execute(query, tuple(values.values()))
         # Commit the changes
         conn.commit()
-
-        sql_logger.debug(f"New entry added to '{table}' table in database '{db}'")
+        sql_logger.debug(
+            f"New entry added to '{table}' table in database '{db}'")
         return True
-
     except mysql.connector.Error as e:
         print(f"Error adding entry to table '{table}': {e}")
         return False
+    finally:
+        # Close the cursor
+        cursor.close()
 
 
 def remove_entry_from_table(conn, db, table, where_clause):
@@ -270,11 +285,13 @@ def remove_entry_from_table(conn, db, table, where_clause):
         cursor.execute(query)
         # Commit the changes
         conn.commit()
-        sql_logger.debug(f"Entry removed from '{table}' table in database '{db}'")
+        sql_logger.debug(
+            f"Entry removed from '{table}' table in database '{db}'")
         return True
     except mysql.connector.Error as e:
         print(f"Error removing entry from table '{table}': {e}")
         return False
+
 
 def execute_query(connection, query):
     result = None
@@ -282,8 +299,8 @@ def execute_query(connection, query):
         cursor = connection.cursor()
         cursor.execute(query)
         result = cursor.fetchall()
+        cursor.execute("COMMIT")
         sql_logger.debug(f"Query executed successfully: {query}")
-
         return result
     except mysql.connector.Error as e:
         print(f"Error executing the query: {e}")
@@ -300,6 +317,23 @@ def update(conn, table_name, columns, where_clause):
         print(f"Table {table_name} already exists")
         sql_logger.error(
             f"Error updating data in table '{table_name}': Table does not exist")
+
+
+def set_row_value(conn, db, table_name, columns_values, where_clause):
+    try:
+        cursor = conn.cursor()
+        cursor.execute(f"USE {db}")
+        cursor.execute(
+            f"UPDATE {table_name} SET {columns_values} WHERE {where_clause}")
+        cursor.execute(f"COMMIT")
+        sql_logger.debug(f"Data in table '{table_name}' updated successfully")
+        if cursor.rowcount == 0:
+            print("No rows updated")
+            sql_logger.debug(
+                f"No rows updated in table '{table_name}'")
+    except mysql.connector.errors.DatabaseError as err:
+        sql_logger.error(
+            f"Error updating data in table '{table_name}': {err})")
 
 
 def delete(conn, table_name, where_clause):
@@ -324,6 +358,7 @@ def test_if_db_exists(conn, db_name):
         sql_logger.error(f"Database '{db_name}' does not exist")
         return False
 
+
 def test_if_table_exists(conn, db_name, table):
     try:
         cursor = conn.cursor()
@@ -344,7 +379,8 @@ def test_if_table_exists(conn, db_name, table):
 
 def get_table_data(conn, db, table):
     try:
-        cursor = conn.cursor(dictionary=True)  # Use dictionary cursor to get results as dictionaries
+        cursor = conn.cursor(
+            dictionary=True)  # Use dictionary cursor to get results as dictionaries
         cursor.execute(f"USE {db}")
         cursor.execute(f"SELECT * FROM {table}")
         result = cursor.fetchall()
@@ -352,4 +388,18 @@ def get_table_data(conn, db, table):
 
     except mysql.connector.Error as e:
         print(f"Error retrieving data from table '{table}': {e}")
+        return None
+
+
+def get_user_id_from_name(conn, db, table, user_name):
+    try:
+        cursor = conn.cursor(
+            dictionary=True)  # Use dictionary cursor to get results as dictionaries
+        cursor.execute(f"USE {db}")
+        cursor.execute(
+            f"SELECT user_id FROM {table} WHERE user_name = '{user_name}'")
+        result = cursor.fetchone()
+        return result
+    except mysql.connector.Error as e:
+        print(f"Error retrieving data from table 'users': {e}")
         return None

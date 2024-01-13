@@ -39,7 +39,7 @@ def get_users_columns():
         ("user_id", "INT NOT NULL AUTO_INCREMENT COMMENT 'User ID'"),
         ("user_name", "VARCHAR(255)"),
         ("date_user_created", "TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP"),
-        ("date_last_active", "TIMESTAMP ON UPDATE CURRENT_TIMESTAMP"),
+        ("date_last_active", "TIMESTAMP"),
     ]
 
 
@@ -73,6 +73,7 @@ def get_requests_keys():
         "INDEX id_created_by (id_created_by)",
         "INDEX id_approved_by (id_approved_by)"
     ]
+
 
 def init_db():
     try:
