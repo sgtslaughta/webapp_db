@@ -26,12 +26,13 @@ def load_parse_csv(csv):
     df = pd.read_csv(stringio)
     return df
 
+
 def set_user():
     if "user" not in st.session_state:
         st.session_state.user = ""
     if st.session_state.user == "":
         user = st.sidebar.text_input(label="Username:",
-                                                      key="active-user").lower()
+                                     key="active-user").lower()
         if user != "":
             st.session_state.user = user
             # add user to DB
@@ -40,35 +41,12 @@ def set_user():
     return st.session_state.user
 
 
-set_user()
-
-if not st.session_state.user:
-    st.sidebar.error("Username cannot be empty", icon="⚠️")
-    st.title("⚠️ Please enter a username to continue...")
-    st.stop()
-
-st.title("New Request")
-
-st.markdown("""
-Add as many items as you want to your request, then submit for approval.
-Your request will be reviewed by a second party and then submitted for
-transmittal.
-""")
-
-st.write("<i>NOTE: All fields accept multiple values of a given type, "
-         "separated by new lines.</i>",
-         unsafe_allow_html=True)
-
-if "full_request" not in st.session_state:
-    st.session_state.full_request = []
-if "full_request_str" not in st.session_state:
-    st.session_state.full_request_str = ""
-
-
 def add_to_request(value):
     if value not in st.session_state.full_request:
         st.session_state.full_request.append(value)
     else:
+        # trunk the value down to the first 10 chars
+        value = value[:50] + "..."
         st.sidebar.error(f"Item already in request: {value}", icon="⚠️")
 
 
@@ -226,61 +204,141 @@ def csv_handler(csv):
     update_draft()
 
 
-
 def clear_request():
     st.session_state.full_request_str = ""
     st.session_state.full_request = []
     update_draft()
 
 
-with st.container(border=True):
-    with st.expander(label="➕ SSH Key", expanded=False):
-        st.write("Add public or private SSH keys to your request.")
-        ssh_key = st.text_area(label="SSH KEY", key="ssh_key",
-                                placeholder="SSH "
-                                            "Keys (Public or Private key, "
-                                            "each on a new line. "
-                                            "Copy entire key including '"
-                                            "-----BEGIN OPENSSH PRIVATE "
-                                            "KEY-----' to end)...",
-                                height=200)
-        add_ssh_button = st.button(label="Add SSH Key", on_click=add_ssh_key,
-                                   args=[ssh_key])
-    with st.expander(label="➕ Email Address", expanded=False):
-        email_address = st.text_area(label="Email Address", key="email_addr",
-                                      placeholder="Email Addresses (new line "
-                                                  "separated)...",
-                                      height=100)
-        add_email_button = st.button(label="Add Emails (new line "
-                                           "separated)", on_click=add_email,
-                                     args=[email_address])
-    with st.expander(label="➕ IP Addresses", expanded=False):
-        st.write("Add IPv4 or IPv6 addresses to your request.")
-        ip_address = st.text_area(label="IP Address", key="ip_addr",
-                                   placeholder="IP Addresses (IPv4 or IPv6, "
-                                               "new line separated)...",
-                                   height=100)
-        add_ip_button = st.button(label="Add IP Address",
-                                  on_click=add_ip_address,
-                                  args=[ip_address])
-    with st.expander(label="➕ Usernames", expanded=False):
-        st.write("Add one or more usernames to your request, comma.")
-        username = st.text_area(label="Username", key="username",
-                                 placeholder="Usernames (new line "
-                                             "separated)...",
-                                 height=100)
-        add_username_button = st.button(label="Add Username",
-                                        on_click=add_username,
-                                        args=[username])
+def setup_page():
+    st.set_page_config(page_title="New Request", page_icon="📝",
+                       layout="wide",
+                       menu_items={"About": "This is a tool to help you "
+                                            "create a request. Simply fill "
+                                            "in the "
+                                            "fields and submit your "
+                                            "request for approval. "
+                                            "Once approved, the request"
+                                            "be transmitted."}
+                       )
+    set_user()
 
-    if st.session_state.full_request_str != "":
-        val = st.session_state.full_request_str
-    else:
-        val = "Your request is empty."
-    st.metric(label="Total Items In Draft:", value=len(
-        st.session_state.full_request))
-    st.text_area(label="Request (Draft)", value=val,
-                 height=200)
+    if not st.session_state.user:
+        st.sidebar.error("Username cannot be empty", icon="⚠️")
+        st.title("⚠️ Please enter a username to continue...")
+        st.stop()
+
+    st.title("📝 New Request")
+    st.markdown("""
+    Requests are broken down in to groups.
+    Add as many items as you want to your group, then add your group to the 
+    request. Continue adding groups as you desire. When ready submit the 
+    completed requests for approval. Once approved, they will be 
+    processed for transmittal.
+    """)
+
+    st.write("<i>NOTE: All fields accept multiple values of a given type, "
+             "separated by new lines.</i>",
+             unsafe_allow_html=True)
+
+    if "full_request" not in st.session_state:
+        st.session_state.full_request = []
+    if "full_request_str" not in st.session_state:
+        st.session_state.full_request_str = ""
+
+
+def draw_adders():
+    st.subheader("Create a new group", divider="rainbow")
+    with st.container(border=True):
+        col1, col2 = st.columns(2)
+        with col1.expander(label="➕ SSH Key", expanded=False):
+            st.write("Add public or private SSH keys to your request.")
+            ssh_key = st.text_area(label="SSH KEY", key="ssh_key",
+                                   placeholder="SSH "
+                                               "Keys (Public or Private key, "
+                                               "each on a new line. "
+                                               "Copy entire key including '"
+                                               "-----BEGIN OPENSSH PRIVATE "
+                                               "KEY-----' to end)...",
+                                   height=200)
+            add_ssh_button = st.button(label="Add SSH Key",
+                                       on_click=add_ssh_key,
+                                       args=[ssh_key])
+        with col2.expander(label="➕ Email Address", expanded=False):
+            email_address = st.text_area(label="Email Address",
+                                         key="email_addr",
+                                         placeholder="Email Addresses (new line "
+                                                     "separated)...",
+                                         height=100)
+            add_email_button = st.button(label="Add Emails (new line "
+                                               "separated)",
+                                         on_click=add_email,
+                                         args=[email_address])
+        col1, col2 = st.columns(2)
+        with col1.expander(label="➕ IP Addresses", expanded=False):
+            st.write("Add IPv4 or IPv6 addresses to your request.")
+            ip_address = st.text_area(label="IP Address", key="ip_addr",
+                                      placeholder="IP Addresses (IPv4 or IPv6, "
+                                                  "new line separated)...",
+                                      height=100)
+            add_ip_button = st.button(label="Add IP Address",
+                                      on_click=add_ip_address,
+                                      args=[ip_address])
+        with col2.expander(label="➕ Usernames", expanded=False):
+            st.write("Add one or more usernames to your request, comma.")
+            username = st.text_area(label="Username", key="username",
+                                    placeholder="Usernames (new line "
+                                                "separated)...",
+                                    height=100)
+            add_username_button = st.button(label="Add Username",
+                                            on_click=add_username,
+                                            args=[username])
+
+        if st.session_state.full_request_str != "":
+            val = st.session_state.full_request_str
+        else:
+            val = "Your group is empty..."
+        st.metric(label="Total Items In Draft:", value=len(
+            st.session_state.full_request))
+        st.text_area(label="Group (Draft)", value=val,
+                     height=200, help="This is a draft of your group. Drag"
+                                      " the bottom right corner to expand.")
+        col1, col2 = st.columns(2)
+        col1.button(label="Add group to request", on_click=update_draft,
+                    use_container_width=True, type="primary")
+        col2.button(label="Clear group", on_click=clear_request,
+                    use_container_width=True, type="secondary")
+        st.write("If you would like to remove values from your group, "
+                 "click the button below 👇")
+        with st.expander(label="Remove values from group", expanded=False):
+            try:
+                options = st.multiselect(label="Select values to remove",
+                                         options=st.session_state.full_request,
+                                         key="remove_values")
+                if options:
+                    if st.button(label="Remove selected values",
+                                 type="primary"):
+                        cnt = 0
+                        total = len(options)
+                        txt = "Removing values..."
+                        progress_bar = st.progress(0, text=txt)
+                        for i in options:
+                            remove_from_request(i)
+                            cnt += 1
+                            progress_percentage = cnt / total
+                            progress_bar.progress(progress_percentage,
+                                                  text=txt)
+                            sleep(0.1)
+                        progress_bar.empty()
+                        st.sidebar.success("Values removed")
+                        update_draft()
+                        st.rerun()
+            except IndexError:
+                pass
+
+
+def draw_file_upload():
+    st.subheader("Bulk Upload", divider="rainbow")
     with st.expander(label="📤 Bulk Upload", expanded=False):
         with st.container(border=True):
             st.write("OPTIONAL: Upload CSV of SSH Keys and Email Addresses")
@@ -300,39 +358,31 @@ with st.container(border=True):
                         "format your CSV file. You may delete the rows "
                         "containing example data, but do not delete the "
                         "header row.</i>", unsafe_allow_html=True)
+
+
+def draw_submit():
+    st.subheader("Submit Request", divider="rainbow")
     with st.container(border=True):
+        full_request = st.text_area(label="Full Request", value="",
+                                    height=400, key="full_request")
+        selected_groups = st.multiselect(label="Select groups to remove",
+                                         options=st.session_state.full_request,
+                                         key="remove_groups")
         col1, col2 = st.columns(2)
         submit_button = col1.button(label="Submit Request for Approval",
-                                    on_click=submit_request, use_container_width=True,
+                                    on_click=submit_request,
+                                    use_container_width=True,
                                     type="primary", disabled=True if len(
-                                    st.session_state.full_request) == 0 else False,
+                st.session_state.full_request) == 0 else False,
                                     help="Submit your request for approval, "
                                          "button is disabled if request is "
                                          "empty.")
         clear_button = col2.button(label="Clear Request", type="secondary",
-                                    use_container_width=True, on_click=clear_request)
-        with st.expander(label="Remove values from draft", expanded=False):
-            try:
-                options = st.multiselect(label="Select values to remove",
-                                options=st.session_state.full_request,
-                                key="remove_values")
-                if options:
-                    if st.button(label="Remove selected values", type="primary"):
-                        cnt = 0
-                        total = len(options)
-                        txt = "Removing values..."
-                        progress_bar = st.progress(0, text=txt)
-                        for i in options:
-                            remove_from_request(i)
-                            cnt += 1
-                            progress_percentage = cnt / total
-                            progress_bar.progress(progress_percentage, text=txt)
-                            sleep(0.1)
-                        progress_bar.empty()
-                        st.sidebar.success("Values removed")
-                        update_draft()
-                        st.rerun()
-            except IndexError as err:
-                pass
+                                   use_container_width=True,
+                                   on_click=clear_request)
 
 
+setup_page()
+draw_adders()
+draw_file_upload()
+draw_submit()

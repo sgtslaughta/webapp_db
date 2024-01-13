@@ -3,11 +3,11 @@ import streamlit as st
 from lib.formatters import *
 from time import sleep
 
-
 logging.basicConfig(level=logging.WARNING)
 
 st.title("My Requests")
 st.write("This page shows all requests that you have submitted.")
+
 
 def make_manage_frame():
     data = st.session_state.my_requests
@@ -19,7 +19,7 @@ def make_manage_frame():
 def dataframe_with_selections(df):
     df_with_selections = df.copy()
     columns = ["request_id", "date_created", "approval_status",
-                                "date_approved", "xml_text"]
+               "date_approved", "xml_text"]
     df_with_selections.columns = columns
     df_with_selections.insert(0, "Select", False)
 
@@ -48,8 +48,9 @@ if "user" in st.session_state and st.session_state.user != "":
         st.session_state.my_requests = data
         my_req = dataframe_with_selections(data)
         make_manage_frame()
-        if st.button("Remove Selected"):
-            selected_rows = my_req[my_req.Select]
+        selected_rows = my_req[my_req.Select]
+        if st.button("Delete Selected Requests", type="primary",
+                     disabled=True if len(selected_rows) == 0 else False):
             for i in [*selected_rows["request_id"]]:
                 remove_user_request_by_id(i)
             st.sidebar.success("Rows removed")
@@ -58,4 +59,3 @@ if "user" in st.session_state and st.session_state.user != "":
         st.write("You have no submitted requests.")
 else:
     st.switch_page("New Request.py")
-
