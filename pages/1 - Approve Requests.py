@@ -1,8 +1,12 @@
 import streamlit as st
 from lib.formatters import *
 import logging
+import plotly.express as px
+import plotly.figure_factory as ff
 
 logging.basicConfig(level=logging.WARNING)
+st.set_page_config(page_title="Approve Requests", page_icon="🤝",
+                   layout="wide")
 
 
 def fetch_data():
@@ -63,6 +67,7 @@ def dataframe_with_selections(df):
         column_config={
             "Select": st.column_config.CheckboxColumn(required=True)},
         disabled=df.columns,
+        width=2000
     )
 
     # Filter the dataframe using the temporary column, then drop the column
@@ -74,6 +79,113 @@ def print_selected_rows(rows):
     if "submissions" not in st.session_state:
         st.session_state.submissions = []
     st.session_state.submissions = rows
+
+
+def get_and_merge_dataframes():
+    req_df = fetch_data()
+    with connect(HOST, PORT, USER, PASSWORD) as conn:
+        if conn:
+            users_df = table_data_to_df(conn, "webapp_db", "users")
+    new_df = merge_dataframes(req_df, users_df)
+    return new_df
+
+def make_graphs():
+    with st.expander(expanded=False, label="Graphs"):
+        tab1, tab2, tab3 = st.tabs(["Approvals & Submissions", "Pending",
+                                    "Timeline"])
+        approvals_tab, submissions_tab = tab1.tabs(["Approvals",
+                                                    "Submissions"])
+        # Create a scatter plot of approvals by user
+        dataframe = get_and_merge_dataframes()
+        df = dataframe.copy()
+        df['date_created'] = pd.to_datetime(df['date_created'])
+        df['date_approved'] = pd.to_datetime(df['date_approved'])
+
+        # Create a new DataFrame with only the relevant columns
+        approval_data = df[['approved_by', 'date_approved']]
+
+        # Group by 'approved_by' and count the number of approvals
+        approval_counts = approval_data.groupby(
+            ['approved_by', 'date_approved']).size().reset_index(
+            name='approval_count')
+
+        # Filter out non-positive values
+        approval_counts = approval_counts[approval_counts['approval_count'] > 0]
+        fig = px.scatter(approval_counts, x='approved_by', y='approval_count',
+                         size='approval_count', color='approval_count',
+                         hover_name='approved_by',
+                         title="Approvals by User")
+
+        approvals_tab.plotly_chart(fig, use_container_width=True)
+
+        # Crate a scatter plot of submissions by user
+        df_copy = dataframe.copy()
+
+        # Convert 'date_created' and 'date_approved' columns to datetime objects
+        df_copy['date_created'] = pd.to_datetime(df_copy['date_created'])
+        df_copy['date_approved'] = pd.to_datetime(df_copy['date_approved'])
+
+        # Create a new DataFrame with only the relevant columns
+        submission_data = df_copy[['created_by', 'date_created']]
+
+        # Group by 'approved_by' and count the number of submissions
+        submission_counts = submission_data.groupby(
+            'created_by').size().reset_index(name='submission_count')
+
+        # Filter out non-positive values
+        submission_counts = submission_counts[
+            submission_counts['submission_count'] > 0]
+
+        # Create a scatter plot using Plotly Express
+        fig = px.scatter(submission_counts, x='created_by',
+                         y='submission_count',
+                         size='submission_count', color='submission_count',
+                         hover_name='created_by',
+                         title='Users with the Most Submissions (Scatter Plot)',
+                         labels={'submission_count': 'Submission Count'})
+        submissions_tab.plotly_chart(fig, use_container_width=True)
+
+        # Create a bar chart of long-lasting pending requests
+        df_copy = dataframe.copy()
+        # Convert 'date_created' and 'date_approved' columns to datetime objects
+        df_copy['date_created'] = pd.to_datetime(df_copy['date_created'])
+        df_copy['date_approved'] = pd.to_datetime(df_copy['date_approved'])
+
+        # Calculate the time pending in hours for each request
+        df_copy['time_pending'] = (pd.to_datetime('now') - df_copy[
+            'date_created']).dt.total_seconds() / 3600
+
+        # Filter out approved requests (consider only pending requests)
+        pending_data = df_copy[df_copy['approval_status'] == 'pending']
+
+        # Sort pending requests by the time pending
+        sorted_pending_data = pending_data.sort_values(by='time_pending',
+                                                       ascending=False)
+
+
+        fig = px.bar(sorted_pending_data, x='time_pending', y='request_id',
+                     # switched x and y
+                     color='time_pending', orientation='h',
+                     # set orientation to horizontal
+                     title='Pending Requests Sorted by Longest Time Pending (in Hours)',
+                     labels={'time_pending': 'Time Pending (Hours)'},
+                     hover_data=['date_created', 'date_approved',
+                                 'approval_status'])
+        tab2.plotly_chart(fig, use_container_width=True)
+
+        fig = px.timeline(st.session_state.fetched_data, x_start="date_created",
+                          x_end="date_approved", y="created_by",
+                          color="created_by", title="Timeline of "
+                                                    "Approved Requests",
+                          labels={'created_by': 'User',
+                                  'date_created': 'Date Created',
+                                  'date_approved': 'Date Approved'})
+        tab3.plotly_chart(fig, use_container_width=True)
+        tab3.write("<i>NOTE: The timeline above shows the date the request was "
+                   "created and the date it was approved. The timeline does "
+                   "not show pending requests. This helps us see how long an"
+                   "average request takes to be approved.<i>",
+                   unsafe_allow_html=True)
 
 
 def submit():
@@ -92,7 +204,7 @@ st.title("🤝 Approve Requests")
 st.write("This page shows all requests that have been submitted for "
          "approval. NOTE: Only requests made by others will  be displayed.")
 if "user" in st.session_state and st.session_state.user != "":
-    st.info(f"Logged in as: {st.session_state.user}")
+
     # get the user's ID from the database
     with connect(HOST, PORT, USER, PASSWORD) as conn:
         uid = get_user_id_from_name(conn, "webapp_db", "users",
@@ -108,6 +220,10 @@ if "user" in st.session_state and st.session_state.user != "":
     if len(st.session_state.fetched_data) > 0:
         st.session_state.fetched_data = st.session_state.fetched_data[
             st.session_state.fetched_data['id_created_by'] != uid]
+
+        st.button("🔄 Make graphs", on_click=make_graphs, help="Generate "
+                                                                  "the "
+                                                                  "graphs", )
 else:
     st.switch_page("New Request.py")
 
@@ -119,11 +235,11 @@ if len(st.session_state.fetched_data) > 0:
     total = data['approval_status'].value_counts()
     pending = total.get('pending', 0)
     st.metric(label="Pending/Total", value=int(pending), delta=len(data))
-col1, col2, col3, col4, col5 = st.columns(5, gap="small")
-with col5:
-    st.button("🔄", on_click=set_data, help="Refresh data")
 if len(st.session_state.fetched_data) > 0:
-    selection = dataframe_with_selections(st.session_state.fetched_data)
+    with st.container(border=True):
+        st.write("Select rows to approve:")
+        selection = dataframe_with_selections(st.session_state.fetched_data)
+        st.button("🔄", on_click=set_data, help="Refresh data")
 else:
     st.write("No requests to display")
     st.stop()
@@ -154,4 +270,3 @@ if approve and len(selection) > 0:
                              use_container_width=True)
 elif approve and len(selection) == 0:
     st.sidebar.warning("No rows selected for approval", icon="⚠️")
-

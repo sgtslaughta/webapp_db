@@ -33,6 +33,7 @@ def dataframe_with_selections(df):
         column_config={
             "Select": st.column_config.CheckboxColumn(required=True)},
         disabled=df.columns,
+        width=2000
     )
 
     # Filter the dataframe using the temporary column, then drop the column

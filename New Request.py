@@ -311,7 +311,6 @@ def explode_dict(d, result=None, current_key=None):
 
 
 def remove_items_from_dict(values_to_remove, d):
-    print(d)
     if isinstance(d, dict):
         for item in d:
             if isinstance(item, dict):
@@ -449,10 +448,9 @@ def draw_adders():
                         label="Select values to remove",
                         options=items,
                         key="remove_values")
+                    TODO: "Fix this so that vals are removed from the dict"
                     gdict = st.session_state.group_draft
                     groupd = gdict[st.session_state.current_group]
-                    show_rem_button = False if len(options) >= 1 else True
-                    print(show_rem_button)
                     if st.form_submit_button(
                             label="Remove selected values",
                             type="primary",
@@ -488,7 +486,8 @@ def draw_file_upload():
                     st.write(
                         "<i>NOTE: This template provides an example of how "
                         "to "
-                        "format your YML file. Be mindful of the format.</i>",
+                        "structure your YML file. Be mindful of the "
+                        "format.</i>",
                         unsafe_allow_html=True)
 
 
@@ -528,8 +527,8 @@ def draw_submit():
                                          args=[selected_groups],
                                          use_container_width=True, )
             col1, col2 = st.columns(2)
-            show_submit = True if len(
-                st.session_state.group_draft) > 0 else False
+            show_submit = False if len(
+                st.session_state.full_request_draft) > 0 else True
             submit_button = col1.button(label="Submit Request for Approval",
                                         on_click=submit_request,
                                         use_container_width=True,
