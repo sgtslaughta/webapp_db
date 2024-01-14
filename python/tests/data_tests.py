@@ -1,4 +1,4 @@
-from lib.sql_cmds import *
+from python.lib.sql_cmds import *
 
 
 def add_new_user(conn, user_name):

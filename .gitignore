@@ -1,6 +1,6 @@
-/logs/app.log
-/logs/SQL.log
-/lib/logs/app.log
-/lib/home/devuser/code/webapp_d/app.log
-/lib/home/devuser/code/webapp_d/SQL.log
-/lib/logs/SQL.log
+/python/logs/app.log
+/python/logs/SQL.log
+/python/lib/logs/app.log
+/python/lib/home/devuser/code/webapp_d/app.log
+/python/lib/home/devuser/code/webapp_d/SQL.log
+/python/lib/logs/SQL.log

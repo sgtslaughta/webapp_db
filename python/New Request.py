@@ -1,17 +1,15 @@
-import pandas as pd
 import streamlit as st
 from lib.validators import *
 from lib.formatters import *
 import logging
 from io import StringIO
 from re import split
-from time import sleep
 import datetime
 import yaml
 from streamlit.web.server.websocket_headers import _get_websocket_headers
 
 headers = _get_websocket_headers()
-access_token = headers.get("X-Access-Token")
+#access_token = headers.get("X-Access-Token")
 if headers is not None:
     st.session_state['headers'] = headers
 
@@ -31,7 +29,7 @@ def load_parse_csv(csv):
 
 def set_user():
     if "user" not in st.session_state:
-        st.session_state.user = ""
+        st.session_state["user"] = ""
     if st.session_state.user == "":
         user = st.sidebar.text_input(label="Username:",
                                      key="active-user").lower()
@@ -178,15 +176,12 @@ def submit_request():
 
     with connect(HOST, PORT, USER, PASSWORD) as conn:
         if conn:
-            query = f"SELECT user_name FROM users WHERE user_name = '{user}'"
-            result = execute_query(conn, query)
+            uid = get_user_id_from_name(conn, "webapp_db", "users", user)
             # Check if user exists in DB
-            if not result:
+            if not uid:
                 # Add user to DB
                 add_entry_to_table(conn, "webapp_db", "users",
                                    {"user_name": user})
-            # get the users id
-            uid = get_user_id_from_name(conn, "webapp_db", "users", user)
             try:
                 if uid['user_id']:
                     uid = uid['user_id']

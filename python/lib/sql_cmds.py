@@ -252,27 +252,25 @@ def drop_table(conn, table_name):
 
 
 def add_entry_to_table(conn, db, table, values):
-    cursor = None
     try:
-        cursor = conn.cursor()
-        # Construct the INSERT query dynamically based on the provided values
-        columns = ', '.join(values.keys())
-        placeholders = ', '.join(['%s'] * len(values))
-        query = f"INSERT INTO {table} ({columns}) VALUES ({placeholders})"
-
-        # Execute the INSERT query
-        cursor.execute(query, tuple(values.values()))
-        # Commit the changes
-        conn.commit()
+        # Use the 'with' statement to ensure proper handling of the cursor
+        with conn.cursor() as cursor:
+            # Construct the INSERT query dynamically based on the provided values
+            columns = ', '.join(values.keys())
+            placeholders = ', '.join(['%s'] * len(values))
+            # Select the database
+            cursor.execute(f"USE {db}")
+            # Construct and execute the INSERT query
+            query = f"INSERT INTO {table} ({columns}) VALUES ({placeholders})"
+            cursor.execute(query, tuple(values.values()))
+            # Commit the changes
+            conn.commit()
         sql_logger.debug(
             f"New entry added to '{table}' table in database '{db}'")
         return True
     except mysql.connector.Error as e:
-        print(f"Error adding entry to table '{table}': {e}")
+        sql_logger.error(f"Error adding entry to table '{table}': {e}")
         return False
-    finally:
-        # Close the cursor
-        cursor.close()
 
 
 def remove_entry_from_table(conn, db, table, where_clause):
@@ -321,19 +319,20 @@ def update(conn, table_name, columns, where_clause):
 
 def set_row_value(conn, db, table_name, columns_values, where_clause):
     try:
-        cursor = conn.cursor()
-        cursor.execute(f"USE {db}")
-        cursor.execute(
-            f"UPDATE {table_name} SET {columns_values} WHERE {where_clause}")
-        cursor.execute(f"COMMIT")
+        # Use the 'with' statement to ensure proper handling of the cursor
+        with conn.cursor() as cursor:
+            # Select the database
+            cursor.execute(f"USE {db}")
+            # Update the row in the table
+            cursor.execute(
+                f"UPDATE {table_name} SET {columns_values} WHERE {where_clause}")
+            # Commit the changes
+            conn.commit()
         sql_logger.debug(f"Data in table '{table_name}' updated successfully")
-        if cursor.rowcount == 0:
-            print("No rows updated")
-            sql_logger.debug(
-                f"No rows updated in table '{table_name}'")
-    except mysql.connector.errors.DatabaseError as err:
+    except mysql.connector.Error as err:
+        # Catching a more general exception 'mysql.connector.Error'
         sql_logger.error(
-            f"Error updating data in table '{table_name}': {err})")
+            f"Error updating data in table '{table_name}': {err}")
 
 
 def delete(conn, table_name, where_clause):

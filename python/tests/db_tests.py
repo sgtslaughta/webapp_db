@@ -1,4 +1,4 @@
-from lib.sql_cmds import *
+from python.lib.sql_cmds import *
 import unittest
 
 
