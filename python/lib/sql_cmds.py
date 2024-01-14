@@ -7,7 +7,7 @@ import os
 
 # Hard coded credentials for testing, this should be changed to use environment variables
 # or a config file
-HOST = "127.0.0.1"
+HOST = "webapp-db"
 PORT = 3306
 USER = "root"
 PASSWORD = "ASuperStrongAndSecurePassword123!!!"
