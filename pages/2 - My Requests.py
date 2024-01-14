@@ -1,7 +1,6 @@
 import logging
 import streamlit as st
 from lib.formatters import *
-from time import sleep
 
 logging.basicConfig(level=logging.WARNING)
 

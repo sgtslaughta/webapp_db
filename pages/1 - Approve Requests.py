@@ -2,7 +2,6 @@ import streamlit as st
 from lib.formatters import *
 import logging
 import plotly.express as px
-import plotly.figure_factory as ff
 
 logging.basicConfig(level=logging.WARNING)
 st.set_page_config(page_title="Approve Requests", page_icon="🤝",
@@ -89,8 +88,8 @@ def get_and_merge_dataframes():
     new_df = merge_dataframes(req_df, users_df)
     return new_df
 
-def make_graphs():
-    with st.expander(expanded=False, label="Graphs"):
+def make_graphs(container):
+    with container.expander(expanded=False, label="Graphs"):
         tab1, tab2, tab3 = st.tabs(["Approvals & Submissions", "Pending",
                                     "Timeline"])
         approvals_tab, submissions_tab = tab1.tabs(["Approvals",
@@ -221,9 +220,6 @@ if "user" in st.session_state and st.session_state.user != "":
         st.session_state.fetched_data = st.session_state.fetched_data[
             st.session_state.fetched_data['id_created_by'] != uid]
 
-        st.button("🔄 Make graphs", on_click=make_graphs, help="Generate "
-                                                                  "the "
-                                                                  "graphs", )
 else:
     st.switch_page("New Request.py")
 
@@ -270,3 +266,9 @@ if approve and len(selection) > 0:
                              use_container_width=True)
 elif approve and len(selection) == 0:
     st.sidebar.warning("No rows selected for approval", icon="⚠️")
+graph_container = st.container(border=True)
+graph_container.subheader("Data Graphs", divider="rainbow")
+graph_container.button("🔄 Make graphs", on_click=make_graphs, help="Generate "
+                                                                  "the "
+                                                                  "graphs",
+                       args=[graph_container])
