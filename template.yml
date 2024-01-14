@@ -1,0 +1,84 @@
+- group1:
+    ssh_keys:
+      public:
+        - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC+rp+7kEZVEYz+yIOXI1sZidNUiZ9TJTt5TvW27DBOevqgOZPQJ4tfCHxBdD0yi+SARR37SykjX1/z9GdC/a8OVPljSWD9LZKO2MEOETtJnbGEddWpw8lO3RQeqaMDTB8BSJ/BQla0+aZ2e5VhfgUKxjJVJjrrNEh3sWNcQmwpI+kZgpodFwkt968gaOtUERpKNt+u91n3c0KDtv94XKpawegkJfAeDy3XjJRcfTF/l4iFAI5Yy4IgqeR/YHHDLcAvDYq4yBoih3GokJTBHEv9wNYURjPgdKVGLNea9GBJiGauxQsn/67yjX4zS9EMUiDDvkavdSVr+Z1m0udkeOuP
+      private:
+        - |
+          -----BEGIN RSA PRIVATE KEY-----
+          MIIEpAIBAAKCAQEAvq6fu5BGVRGM/siDlyNbGYnTVImfUyU7eU71tuwwTnr6oDmT
+          0CeLXwh8QXQ9MovkgEUd+0spI19f8/RnQv2vDlT5Y0lg/S2SjtjBDhE7SZ2xhHXV
+          qcPJTt0UHqmjA0wfAUifwUJWtPmmdnuVYX4FCsYyVSY66zRId7FjXEJsKSPpGYKa
+          HRcJLfevIGjrVBEaSjbfrvdZ93NCg7b/eFyqWsHoJCXwHg8t14yUXH0xf5eIhQCO
+          WMuCIKnkf2Bxwy3ALw2KuMgaIodxqJCUwRxL/cDWFEYz4HSlRizXmvRgSYhmrsUL
+          J/+u8o1+M0vRDFIgw75Gr3Ula/mdZtLnZHjrjwIDAQABAoIBAQCY1nst6fyV3xV2
+          et4O3MX+eFytnAnaqTM8jq+gyTwHC8erebsi0y+BItoF1NfglgS3U68uZxY4RhAx
+          CCtkpNYV1MJ4dK6LAGZCnTZQwjsVTJKnK5PxGP9YeRfRZANHd1I6wy1ZyISbVqe4
+          vGIF3O7JrgdV/Oio8iVL2yFbJ9puNfirFS4+JJC05RWqPVId2AC+69FHYAUm8ZaL
+          FUbRlZKbWhe2g0gTt3S4FDkEhUreUSCz0q2/hiZMdDAGQgt7Q2asp0YlHQd/KU8G
+          YY9BxCSR3eRSIoRjEB1oM7volSOLzEirxlNoCscYh1s68ODMWhxwlFh7I0MGNb3U
+          jy48QtJRAoGBAPMIOqSVl8TZcta4jicqBYxsKhON/wEiD7Qg7PHOMqunizJQKdtb
+          WnecLOXWnwMaveCJWzkGQ3BdxuVL6s4RSXB3YpMwIgNwsbK7YZV1n4JlmPaiCqb2
+          ttpu5yPYZWbTmOzZXIABkXcLZfaMJ5dFgA41Hbg8hbBlAHZJy/KxVjcVAoGBAMjb
+          TdH56ThplTKgHjthrenm6rY4zfIgb4waFDUlFESyeDQiUKG+Svnvf/8vFK26auDy
+          zvlIQkX41Ttnp0MACZffceA/K+3LzmfSHSSR6T0Vk1IeCRuvt1ZxZJ5YPrL3mR3r
+          wMGVkpGEvRiMK+rNTrr4C3vJTZnN9d4vr/iwXMETAoGAb7tOyrADsHqQM2tx30uQ
+          dXic95SGskyoj5W7mYfE/+ntMtpsA+9B7k+czKYZQOIgfYRorhTVGGnksTJv5wFH
+          lC8u4KB2YsKCz7saKA6FoPt4kZr57rzqYA4wsegg5l9NpUZhInCWIfbZj7nr0b4g
+          G2gMG9GnXOtyhO90lkU1b+kCgYBSY/sZDd2IAW9tE9cy3o+badiPpN992aZIHw54
+          +lvFDjxWjljq8AcLXR3xDFv8I4LiAVe7U9Ozpi25r3wh9Kr6vHKW3PLlGXvyhHLl
+          5GB7aRVEUwPDcqHO+LagaWxWt0/8wQ8RmYxE2uFCZ4VATLVl5oe3YEzPsXeQi5kw
+          dw+lNwKBgQCdFYF3SCtzGO9TBzbEIm2AYpvavj6yfp0HJ1GYcLJe3zms55HUoUBs
+          cSInANPWbq0M0yqc2mGgj+CUvR9MJ7TMFjy0o4LSovmVkk2D747VsmjsyqjuUNid
+          7R5pQeVvJHsqHLWfMgNFUO8yaE60Uzpz+WPGwMCVTp6H6JbRjnHi/g==
+          -----END RSA PRIVATE KEY-----
+        - |
+          -----BEGIN RSA PRIVATE KEY-----
+          MIIEpAIBAAKCAQEAhoLTHXicSQxJf3uYwj6GdPdjaZcw0WHXiJxH57L4foqu5IjT
+          7nMWSgc7dQDoEoKyEhDNh7ylA0RqGQm5hffkxo5EncNlKLEggC2sRluM4l3EpT+C
+          Yb6WVGRET+G6rejxnyCQR8JWnAxknsBa1cf4z7NOSuGONPwoQpyjUPOYwdbVweTb
+          4a3cNS/NpfFjuTjMLRQJ/BC3qw/UrL8He7gW1Kx1f1z+iiQnp5XAVTVy9a0VYQrn
+          u4iwjlVVjwEGempdFK+ll8W7H5NdfQeQfosDrhaH5Z4retxvfsQ+EqTx3haunXPu
+          5lvzpeHKyzFZJV1Iq9KVSMZjKInV+zZKkjK5kQIDAQABAoIBABjNxQpZNFCQEHmO
+          nBOtnfOxrsZI1/q0VR9e2i+SpBoJjsibpqEA3epWvRMNUL4hFZ8ZNB1EnxUkJ4Bo
+          d6qJlMk8cNC6uEuxpfGc+nia5zbS3bEvLebCU0xKlQI5+Mea/fs+8PwajQgHjQJt
+          LBLh5jK+uMA8KZIBsZbe9Yq28MNFiu3NNiyCRFAVTv7lY1Qi+70hS0ivc7lIU8Uh
+          b5nVBOwPKVKmIqbRmZBTI/JOQ5ujOaK0oRMf3P8JTQTIPt6qBP2drLLsCF5XcO6/
+          FVmPWkrfY3smeAF029d1FjeZdRHcied9cJZL2Rrlpz/EK5NSlQvurtteKvM5Q0Qi
+          6EUmvTECgYEAwvpY88UXiR6082kPh7mzx2zmwW7jpOZXm/4PdPQ8QJJgXlj0VM+e
+          boV3bjx4Za9SOGZ/1J+jItCOLSGf3UArsBDGAC1is8eltfQ1+eN0lKrg3QhjKiXm
+          MGYiWNfEyTXAylg6ONc1Vr2ZWArC+O4NCRPFCkqNxSVUeB0vWb4rfF0CgYEAsJvd
+          FOC8LtCKa6ggBw15CA2JnNGqzwI8G4DXQR2+rOhUffpLqB6hFXkKK219BEC5RXTD
+          5JMTPlPKrFV1QAs4ZEeURVY0cMPGxvzW1vfbBIT2ybeBDhX3Nu8X74KxoEtDs0Bu
+          Q+h1/9a0u+5Y/qKqwbuwXLTc6HanIbgwqcc7vsUCgYEAugUbZMd/YuUXArwTgwxb
+          R0LRDW98ZNEWeM91c8Go0npU0u7PfTLwFsXjYhrzSyBvszunbfY4MHkFjG1uFiqp
+          A7udDIJAjwFFSkmKTbUCfuxgyMC9y3KJIVfwIQ8KwmU0YFi4g45fZzhQ2ry5s8F6
+          UlS4Qs9KXvL0mfxONrLGzkkCgYBHKKXtkZeBLVl4gydUcCNCEWJPI1O1UOszEbip
+          bfiz5nCUydLODHlPE5P7Z4QlwIZl6+Q6JuBsDors4Qn7Igo4rXaacV9zyA5BgwJ1
+          XyyKJ6DgKeX/7O3M3o1AXeJ/+ZNvmBhVmEZjLPlpd2G4R4aRxLQMxnrz10sEFRjW
+          b4YtGQKBgQC9kG+9imEYrvqWCvYlsXSiJmdDvA3A1IlakuFWUvpcAqQbXt3wsJEV
+          IwJgKG+o7VyOlde2wsp8m1z23Uu9C7U+BlyhpeRbntuyOMo31acx/1GNx+a/6EPJ
+          Pga6TfaanjxrbsjcpMma9QB9JWvO6aHvhICmrfl8kOPfIIMhkCs1hw==
+          -----END RSA PRIVATE KEY-----
+    ip_addrs:
+      - 192.168.1.10
+      - 2001:0db8:85a3:0000:0000:8a2e:0370:7334
+    user_names:
+      - john_doe
+      - alice_smith
+    email_addrs:
+      - john.doe@example.com
+      - alice.smith@example.com
+- group2:
+    ssh_keys:
+      public:
+        - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCGgtMdeJxJDEl/e5jCPoZ092NplzDRYdeInEfnsvh+iq7kiNPucxZKBzt1AOgSgrISEM2HvKUDRGoZCbmF9+TGjkSdw2UosSCALaxGW4ziXcSlP4JhvpZUZERP4bqt6PGfIJBHwlacDGSewFrVx/jPs05K4Y40/ChCnKNQ85jB1tXB5Nvhrdw1L82l8WO5OMwtFAn8ELerD9Ssvwd7uBbUrHV/XP6KJCenlcBVNXL1rRVhCue7iLCOVVWPAQZ6al0Ur6WXxbsfk119B5B+iwOuFoflnit63G9+xD4SpPHeFq6dc+7mW/Ol4crLMVklXUir0pVIxmMoidX7NkqSMrmR
+    ip_addrs:
+      - 10.0.0.5
+      - 2001:0db8:85a3:0000:0000:8a2e:0370:7335
+    user_names:
+      - bob_jones
+      - charlie_brown
+    email_addrs:
+      - bob.jones@example.com
+      - charlie.brown@example.com
+

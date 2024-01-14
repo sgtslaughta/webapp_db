@@ -88,7 +88,7 @@ def submit():
     set_data()
 
 
-st.title("All Requests")
+st.title("🤝 Approve Requests")
 st.write("This page shows all requests that have been submitted for "
          "approval. NOTE: Only requests made by others will  be displayed.")
 if "user" in st.session_state and st.session_state.user != "":
@@ -118,7 +118,7 @@ if len(st.session_state.fetched_data) > 0:
     data = st.session_state.fetched_data
     total = data['approval_status'].value_counts()
     pending = total.get('pending', 0)
-    st.metric(label="Total/Pending", value=len(data), delta=int(pending))
+    st.metric(label="Pending/Total", value=int(pending), delta=len(data))
 col1, col2, col3, col4, col5 = st.columns(5, gap="small")
 with col5:
     st.button("🔄", on_click=set_data, help="Refresh data")

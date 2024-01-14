@@ -5,7 +5,10 @@ from time import sleep
 
 logging.basicConfig(level=logging.WARNING)
 
-st.title("My Requests")
+st.set_page_config(page_title="My Requests", page_icon="🤘",
+                   layout="wide")
+
+st.title("🤘 My Requests")
 st.write("This page shows all requests that you have submitted.")
 
 
@@ -42,6 +45,7 @@ if "my_requests" not in st.session_state:
     st.session_state.my_requests = []
 
 if "user" in st.session_state and st.session_state.user != "":
+    st.write(f"Requests for user: {st.session_state.user}")
     data = get_requests_by_user(st.session_state.user)
     data = pd.DataFrame(data)
     if len(data) > 0:
