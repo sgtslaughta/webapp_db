@@ -4,7 +4,6 @@ import plotly.express as px
 from lib.sql_cmds import *
 from lib.formatters import *
 
-
 logging.basicConfig(level=logging.WARNING)
 st.set_page_config(page_title="Approve Requests", page_icon="🤝",
                    layout="wide")
@@ -90,6 +89,7 @@ def get_and_merge_dataframes():
     new_df = merge_dataframes(req_df, users_df)
     return new_df
 
+
 def make_graphs(container):
     with container.expander(expanded=False, label="Graphs"):
         tab1, tab2, tab3 = st.tabs(["Approvals & Submissions", "Pending",
@@ -111,7 +111,8 @@ def make_graphs(container):
             name='approval_count')
 
         # Filter out non-positive values
-        approval_counts = approval_counts[approval_counts['approval_count'] > 0]
+        approval_counts = approval_counts[
+            approval_counts['approval_count'] > 0]
         fig = px.scatter(approval_counts, x='approved_by', y='approval_count',
                          size='approval_count', color='approval_count',
                          hover_name='approved_by',
@@ -163,7 +164,6 @@ def make_graphs(container):
         sorted_pending_data = pending_data.sort_values(by='time_pending',
                                                        ascending=False)
 
-
         fig = px.bar(sorted_pending_data, x='time_pending', y='request_id',
                      # switched x and y
                      color='time_pending', orientation='h',
@@ -174,7 +174,10 @@ def make_graphs(container):
                                  'approval_status'])
         tab2.plotly_chart(fig, use_container_width=True)
 
-        fig = px.timeline(st.session_state.fetched_data, x_start="date_created",
+        df = dataframe.copy()
+        approved_data = df[df['approval_status'] == 'approved']
+        fig = px.timeline(approved_data,
+                          x_start="date_created",
                           x_end="date_approved", y="created_by",
                           color="created_by", title="Timeline of "
                                                     "Approved Requests",
@@ -182,11 +185,12 @@ def make_graphs(container):
                                   'date_created': 'Date Created',
                                   'date_approved': 'Date Approved'})
         tab3.plotly_chart(fig, use_container_width=True)
-        tab3.write("<i>NOTE: The timeline above shows the date the request was "
-                   "created and the date it was approved. The timeline does "
-                   "not show pending requests. This helps us see how long an"
-                   "average request takes to be approved.<i>",
-                   unsafe_allow_html=True)
+        tab3.write(
+            "<i>NOTE: The timeline above shows the date the request was "
+            "created and the date it was approved. The timeline does "
+            "not show pending requests. This helps us see how long an"
+            "average request takes to be approved.<i>",
+            unsafe_allow_html=True)
 
 
 def submit():
@@ -271,6 +275,6 @@ elif approve and len(selection) == 0:
 graph_container = st.container(border=True)
 graph_container.subheader("Data Graphs", divider="rainbow")
 graph_container.button("🔄 Make graphs", on_click=make_graphs, help="Generate "
-                                                                  "the "
-                                                                  "graphs",
+                                                                   "the "
+                                                                   "graphs",
                        args=[graph_container])

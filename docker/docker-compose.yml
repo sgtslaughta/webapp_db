@@ -24,7 +24,7 @@ services:
     restart: always
     ports:
       # Expose port 80 to host on localhost
-      - "80:80"
+      - "80:8088"
       - "443:443"
     networks:
         - webapp-network

@@ -75,19 +75,37 @@ def get_requests_keys():
     ]
 
 
+def table_exists(conn, db_name, table_name):
+    """
+    Check if a table exists in the specified database.
+    """
+    try:
+        with conn.cursor() as cursor:
+            cursor.execute(f"USE {db_name}")
+            cursor.execute(f"SHOW TABLES LIKE '{table_name}'")
+            return cursor.fetchone() is not None
+    except Exception as e:
+        print(f"Error checking table existence: {e}")
+        logging.error(f"Error checking table existence: {e}")
+        return False
+
+
 def init_db():
     try:
         with connect("127.0.0.1", 3306, "root",
                      "ASuperStrongAndSecurePassword123!!!") as conn:
             if conn:
-                # Add 'users' table
-                add_table(conn, "webapp_db", "users", get_users_columns(),
-                          get_users_keys(), create_query=None)
+                # Add 'users' table if it doesn't exist
+                if not table_exists(conn, "webapp_db", "users"):
+                    add_table(conn, "webapp_db", "users", get_users_columns(),
+                              get_users_keys(), create_query=None)
 
-                # Add 'requests' table
-                add_table(conn, "webapp_db", "requests",
-                          get_requests_columns(), get_requests_keys(),
-                          create_query=None)
+                # Add 'requests' table if it doesn't exist
+                if not table_exists(conn, "webapp_db", "requests"):
+                    add_table(conn, "webapp_db", "requests",
+                              get_requests_columns(), get_requests_keys(),
+                              create_query=None)
+
                 print("User and request tables created successfully.")
                 logging.info("DB init successful.")
     except Exception as err:
