@@ -16,20 +16,26 @@ services:
       - mariadb_data:/var/lib/mysql
     networks:
         - webapp-network
-  webapp:
-    build:
-        context: .
-        dockerfile: Dockerfile
-    container_name: webapp
-    restart: always
     ports:
-      # Expose port 80 to host on localhost
-      - "80:8088"
-      - "443:443"
-    networks:
-        - webapp-network
-    volumes:
-      - ./webapp_logs:/app/logs
+      - "3306:3306"
+#  webapp:
+#    build:
+#        context: .
+#        dockerfile: Dockerfile
+#    container_name: webapp
+#    restart: always
+#    environment:
+#      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+#      MYSQL_DATABASE: ${MYSQL_DATABASE}
+#      MYSQL_USER: ${MYSQL_USER}
+#    ports:
+#      # Expose port 80 to host on localhost
+#      - "80:8088"
+#      - "443:443"
+#    networks:
+#        - webapp-network
+#    volumes:
+#      - ./webapp_logs:/app/logs
 
 volumes:
   mariadb_data:

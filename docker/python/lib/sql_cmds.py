@@ -7,10 +7,11 @@ import os
 
 # Hard coded credentials for testing, this should be changed to use environment variables
 # or a config file
-HOST = "webapp-db"
+HOST = "127.0.0.1"
 PORT = 3306
-USER = "root"
-PASSWORD = "ASuperStrongAndSecurePassword123!!!"
+USER = 'root'
+# PASSWORD = os.environ.get('MYSQL_ROOT_PASSWORD')
+PASSWORD = 'ASuperStrongAndSecurePassword123!!!'
 
 # Get the current directory
 current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -305,16 +306,17 @@ def execute_query(connection, query):
     return result
 
 
-def update(conn, table_name, columns, where_clause):
+def update(conn, db, table_name, columns, where_clause):
     try:
         cursor = conn.cursor()
+        cursor.execute(f"USE {db}")
         cursor.execute(
             f"UPDATE {table_name} SET {columns} WHERE {where_clause}")
         sql_logger.debug(f"Data in table '{table_name}' updated successfully")
-    except mysql.connector.errors.DatabaseError:
-        print(f"Table {table_name} already exists")
+    except mysql.connector.errors.DatabaseError as err:
+        print(f"ERROR: {err}")
         sql_logger.error(
-            f"Error updating data in table '{table_name}': Table does not exist")
+            f"{err} updating data in table '{table_name}'")
 
 
 def set_row_value(conn, db, table_name, columns_values, where_clause):

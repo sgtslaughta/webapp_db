@@ -78,7 +78,8 @@ def add_username(value):
             cnt += 1
     if cnt:
         st.sidebar.success(f"{cnt} Usernames added!")
-    update_draft()
+        st.session_state.user_names = ""
+        update_draft()
 
 
 def add_ssh_key(value):
@@ -98,7 +99,8 @@ def add_ssh_key(value):
             cnt += 1
     if cnt > 0:
         st.sidebar.success(f"{cnt} SSH Keys added!")
-    update_draft()
+        st.session_state.ssh_keys = ""
+        update_draft()
 
 
 def add_ip_address(ip):
@@ -122,7 +124,8 @@ def add_ip_address(ip):
             st.sidebar.error(f"Invalid IP address: {i}", icon="⚠️")
     if cnt > 0:
         st.sidebar.success(f"{cnt} IP Addresses added!")
-    update_draft()
+        st.session_state.ip_addrs = ""
+        update_draft()
 
 
 def add_email(email):
@@ -139,7 +142,8 @@ def add_email(email):
             cnt += 1
     if cnt > 0:
         st.sidebar.success(f"{cnt} Email Addresses added!")
-    update_draft()
+        st.session_state.email_addrs = ""
+        update_draft()
 
 
 def dict_to_xml(dictionary, indent=0):
@@ -307,15 +311,19 @@ def explode_dict(d, result=None, current_key=None):
 
 def remove_items_from_dict(values_to_remove, d):
     if isinstance(d, dict):
-        for item in d:
-            if isinstance(item, dict):
-                remove_items_from_dict(values_to_remove, item)
+        # Create a new dictionary without the specified items
+        new_dict = {key: value for key, value in d.items() if value not in values_to_remove}
+        # Recursively apply the function to nested dictionaries
+        for key, value in new_dict.items():
+            new_dict[key] = remove_items_from_dict(values_to_remove, value)
+        return new_dict
     elif isinstance(d, list):
-        for i, item in enumerate(d):
-            if item in values_to_remove:
-                d.remove(item)
-            else:
-                remove_items_from_dict(values_to_remove, item)
+        # Create a new list without the specified items
+        new_list = [item for item in d if item not in values_to_remove]
+        # Recursively apply the function to list elements
+        return [remove_items_from_dict(values_to_remove, item) for item in new_list]
+    else:
+        return d
 
 
 def setup_page():
@@ -359,6 +367,14 @@ def setup_page():
         st.session_state.current_group = "group_1"
     if "full_request_draft" not in st.session_state:
         st.session_state.full_request_draft = []
+    if 'ip_addrs' not in st.session_state:
+        st.session_state.ip_addrs = ""
+    if 'email_addrs' not in st.session_state:
+        st.session_state.email_addrs = ""
+    if 'user_names' not in st.session_state:
+        st.session_state.user_names = ""
+    if 'ssh_keys' not in st.session_state:
+        st.session_state.ssh_keys = ""
 
 
 def draw_adders():
@@ -367,7 +383,7 @@ def draw_adders():
         col1, col2 = st.columns(2)
         with col1.expander(label="➕ SSH Key", expanded=False):
             st.write("Add public or private SSH keys to your request.")
-            ssh_key = st.text_area(label="SSH KEY", key="ssh_key",
+            ssh_key = st.text_area(label="SSH KEY", key="ssh_keys",
                                    placeholder="SSH "
                                                "Keys (Public or Private key, "
                                                "each on a new line. "
@@ -380,7 +396,7 @@ def draw_adders():
                                        args=[ssh_key])
         with col2.expander(label="➕ Email Address", expanded=False):
             email_address = st.text_area(label="Email Address",
-                                         key="email_addr",
+                                         key="email_addrs",
                                          placeholder="Email Addresses (new line "
                                                      "separated)...",
                                          height=100)
@@ -391,7 +407,7 @@ def draw_adders():
         col1, col2 = st.columns(2)
         with col1.expander(label="➕ IP Addresses", expanded=False):
             st.write("Add IPv4 or IPv6 addresses to your request.")
-            ip_address = st.text_area(label="IP Address", key="ip_addr",
+            ip_address = st.text_area(label="IP Address", key="ip_addrs",
                                       placeholder="IP Addresses (IPv4 or IPv6, "
                                                   "new line separated)...",
                                       height=100)
@@ -400,7 +416,7 @@ def draw_adders():
                                       args=[ip_address])
         with col2.expander(label="➕ Usernames", expanded=False):
             st.write("Add one or more usernames to your request, comma.")
-            username = st.text_area(label="Username", key="username",
+            username = st.text_area(label="Username", key="usernames",
                                     placeholder="Usernames (new line "
                                                 "separated)...",
                                     height=100)
@@ -448,12 +464,11 @@ def draw_adders():
                     groupd = gdict[st.session_state.current_group]
                     if st.form_submit_button(
                             label="Remove selected values",
-                            type="primary",
-                            on_click=remove_items_from_dict,
-                            args=[options, groupd]):
+                            type="primary"):
                         st.sidebar.success("Values removed")
+                        gdict[st.session_state.current_group] = remove_items_from_dict(options, groupd)
                         update_draft()
-                        draft = st.session_state.group_str
+                        st.rerun()
             except IndexError:
                 pass
 

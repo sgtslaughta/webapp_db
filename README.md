@@ -15,9 +15,9 @@ The database must be initialized to apply the correct schema ( Only
 required the first time ). This can be 
 done by running the following command:
 ```bash
-sudo docker-compose exec webapp_db python3 /app/lib/init_db.py
+sudo docker exec webapp python3 /app/lib/db_init.py
 ```
-The application is available at `http://localhost:8501`. 
+The application is available at `http://localhost:80`. 
 
 ## Known Issues:
 - The application is not secure. It is indended to be run behind a reverse proxy

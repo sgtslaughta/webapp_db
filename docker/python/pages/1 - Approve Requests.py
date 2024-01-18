@@ -1,5 +1,6 @@
 import streamlit as st
 import logging
+import pandas as pd
 import plotly.express as px
 from lib.sql_cmds import *
 from lib.formatters import *
@@ -16,7 +17,10 @@ def fetch_data():
 
 
 def merge_dataframes(df1, df2):
-    # Merge DataFrames on common 'id' columns
+    # Print unique values and data types
+
+    df1['id_approved_by'] = pd.to_numeric(df1['id_approved_by'], errors='coerce', downcast='signed')
+
     merged_df = pd.merge(df1, df2, how='left', left_on='id_created_by',
                          right_on='user_id')
     merged_df = pd.merge(merged_df, df2, how='left', left_on='id_approved_by',
@@ -42,7 +46,6 @@ def merge_dataframes(df1, df2):
     merged_df = merged_df.reindex(columns=column_order)
     # Sort by status; pending
     merged_df = merged_df.sort_values(by=['approval_status'], ascending=False)
-
     return merged_df
 
 
@@ -206,8 +209,12 @@ def submit():
 
 
 st.title("🤝 Approve Requests")
-st.write("This page shows all requests that have been submitted for "
-         "approval. NOTE: Only requests made by others will  be displayed.")
+st.markdown(
+    "This page shows all requests that have been submitted for approval. "
+    "NOTE: Only requests made by others will be displayed. "
+    "To view your own requests click <a href='/My_Requests' target='_self'>here</a>.",
+    unsafe_allow_html=True
+)
 if "user" in st.session_state and st.session_state.user != "":
 
     # get the user's ID from the database

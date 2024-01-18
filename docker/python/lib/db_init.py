@@ -1,4 +1,4 @@
-from lib.sql_cmds import *
+from sql_cmds import *
 
 request_table_create = """
 USE webapp_db;
@@ -6,25 +6,26 @@ CREATE TABLE `requests` (
 	`request_id` BIGINT NOT NULL AUTO_INCREMENT,
 	`date_created` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 
 	'Date request was created',
-	`id_created_by` INT DEFAULT NULL,  -- Set the default value to NULL
+	`id_created_by` BIGINT DEFAULT NULL,  -- Set the default value to NULL
 	`approval_status` ENUM('pending', 'approved', 'rejected') NOT NULL 
 	DEFAULT 'pending',
 	`date_approved` TIMESTAMP DEFAULT NULL,
-	`id_approved_by` INT DEFAULT NULL,
+	`id_approved_by` BIGINT DEFAULT NULL,
 	`xml_text` LONGTEXT NOT NULL,
 	KEY `request_index` (`request_id`) USING BTREE,
 	PRIMARY KEY (`request_id`),
-	FOREIGN KEY (`id_created_by`) REFERENCES `user` (`id`),
-	FOREIGN KEY (`id_approved_by`) REFERENCES `user` (`id`),
+	FOREIGN KEY (`id_created_by`) REFERENCES `users` (`user_id`),
+	FOREIGN KEY (`id_approved_by`) REFERENCES `users` (`user_id`),
 	INDEX `id_created_by` (`id_created_by`),
 	INDEX `id_approved_by` (`id_approved_by`)
+	CONSTRAINT `chk_id_approved_by_numeric` CHECK (`id_approved_by` IS NULL OR CAST(`id_approved_by` AS SIGNED) = `id_approved_by`)
 );
 """
 
 user_table_create = """
 USE webapp_db;
 CREATE TABLE `users` (
-	`user_id` INT NOT NULL AUTO_INCREMENT COMMENT 'User ID',
+	`user_id` BIGINT NOT NULL AUTO_INCREMENT COMMENT 'User ID',
 	`user_name` VARCHAR(255),
 	`date_user_created` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	`date_last_active` TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -92,8 +93,8 @@ def table_exists(conn, db_name, table_name):
 
 def init_db():
     try:
-        with connect("127.0.0.1", 3306, "root",
-                     "ASuperStrongAndSecurePassword123!!!") as conn:
+        with connect(HOST, 3306, "root",
+                     PASSWORD) as conn:
             if conn:
                 # Add 'users' table if it doesn't exist
                 if not table_exists(conn, "webapp_db", "users"):
