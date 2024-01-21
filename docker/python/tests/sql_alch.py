@@ -53,7 +53,8 @@ class Request(Base):
     id: Mapped[int] = mapped_column(primary_key=True, init=False,
                                     index=True, autoincrement=True)
     date_created: Mapped[datetime] = mapped_column(init=False, server_default=sq.func.now())
-    id_created_by: Mapped[int] = mapped_column(sq.ForeignKey("users.id"),
+    id_created_by: Mapped[int] = mapped_column(sq.ForeignKey(
+        "users.id"),
                                             index=True)
     approval_status: Mapped[str] = sq.Column(sq.Enum("pending", "approved", "rejected"),
                                             server_default="pending")
@@ -187,7 +188,20 @@ def get_schema(engine, table):
         return None
 
 
-# e = init_engine(echo=True)
+e = init_engine()
+# for i in range(1, 11):
+#     add_item_to_table(e, Request, id_created_by=i, data=json.dumps({"test":
+#                                                                        "test"}))
+x = sq.select(User.user_name, Request.request_data).join_from(Request,
+                                                              User, onclause=User.id == Request.id_created_by)
+with e.connect() as conn:
+    result = conn.execute(x).all()
+    for i in result:
+        print(i)
+# stmnt2 = sq.select(Request)
+# with e.connect() as conn:
+#     result = conn.execute(stmnt2).all()
+#     print(result)
 # print(get_schema(e, "requests"))
 # print(get_table(e, "requests"))
 # if add_item_to_table(e, Request, id_created_by=1, data=json.dumps({"test":
